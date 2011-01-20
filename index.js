@@ -1,4 +1,4 @@
-
+var fs = require('fs');
 var ObjectID = exports.ObjectID = require('mongodb').BSONPure.ObjectID;
 
 if(typeof jfdkslfjksdfjoejfodsieofjdjsiopjafjeipajdjaiieiiiifidsi348889348f8s9fj84j === "undefined"){
@@ -13,7 +13,7 @@ var db = jfdkslfjksdfjoejfodsieofjdjsiopjafjeipajdjaiieiiiifidsi348889348f8s9fj8
 });
 
 db.open(function(err, db){
-    console.log(err)
+    console.log(err);
 });
 
 }
@@ -21,8 +21,9 @@ else{
     var db = jfdkslfjksdfjoejfodsieofjdjsiopjafjeipajdjaiieiiiifidsi348889348f8s9fj84j;
 }
 
-var Model = exports.Model = function Model(name){
+var Model = exports.Model = function Model(name,path){
     this.name = name;
+    this.path = path ? path : "/tmp/~tmp";
 }
 
 
@@ -113,9 +114,32 @@ Model.prototype.update = function update(id, data, callback){
 }
 
 Model.prototype.save = function save(data, callback){
+var mydata = data;
+var mypath = this.path;
     db.collection(this.name, function(err, con){
+    
         con.insert(data, function(err, data){
-            callback(data);
+            if(err){}else{
+                for(var key in mydata){
+                    
+                    var obj = mydata[key];
+                    if(obj && obj.name && obj.path){
+                       var myobj = obj;
+                       fs.readFile("/tmp/"+obj.path, function (err, data) {
+                       
+                       if (err){
+                       
+                       }else{                          
+                           fs.writeFile(mypath+'/'+myobj.path, data, function (err) {
+                              console.log(err);
+                           });                              
+                           }
+                       });
+                    }
+                }
+                callback(data);
+            }
+            
         });
     });
 }
