@@ -23,7 +23,7 @@ else{
 
 var Model = exports.Model = function Model(name,path){
     this.name = name;
-    this.path = path ? path : "/tmp/~tmp";
+    this.path = path ? path : null;
 }
 
 
@@ -104,22 +104,26 @@ Model.prototype.get = function get(id, callback){
 }
 
 Model.prototype.update = function update(id, data, callback){
+
+var mydata = data;
+var mypath = this.path;
+
     db.collection(this.name, function(err, con){
+        con.find({
+            _id: id
+        }, function(err, data){
+            data.toArray(function(err, data){
+
+        for(var k in data[0]){
+            if(data[0][k]){
+                mydata[k] = data[0][k];
+            }
+        }
+                
         con.update({
             _id: id
         }, data, function(err, data){
-            callback();
-        });
-    });
-}
-
-Model.prototype.save = function save(data, callback){
-var mydata = data;
-var mypath = this.path;
-    db.collection(this.name, function(err, con){
-    
-        con.insert(data, function(err, data){
-            if(err){}else{
+            if(err){callback(err,data);}else{
                 for(var key in mydata){
                     
                     var obj = mydata[key];
@@ -137,9 +141,41 @@ var mypath = this.path;
                        });
                     }
                 }
-                callback(data);
+                callback(err,data);
             }
             
+        });                
+                
+            });
         });
+    });
+
+}
+
+Model.prototype.save = function save(data, callback){
+var mydata = data;
+var mypath = this.path;
+    db.collection(this.name, function(err, con){
+        
+            if(err){callback(err,data);}else{
+                for(var key in mydata){
+                    
+                    var obj = mydata[key];
+                    if(obj && obj.name && obj.path){
+                       var myobj = obj;
+                       fs.readFile("/tmp/"+obj.path, function (err, data) {
+                       
+                       if (err){
+                       
+                       }else{                          
+                           fs.writeFile(mypath+'/'+myobj.path, data, function (err) {
+                              console.log(err);
+                           });                              
+                           }
+                       });
+                    }
+                }
+                callback(err,data);
+            }
     });
 }
