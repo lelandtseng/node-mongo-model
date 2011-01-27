@@ -114,16 +114,19 @@ var mypath = this.path;
         }, function(err, data){
             data.toArray(function(err, data){
 
-        for(var k in data[0]){
-            if(data[0][k]){
-                mydata[k] = data[0][k];
+        for(var k in mydata){
+            if(mydata[k]){
+               data[0][k] = mydata[k];
             }
         }
-                
+        
+        console.log(mydata)  
         con.update({
             _id: id
-        }, data, function(err, data){
-            if(err){callback(err,data);}else{
+        }, data[0], function(err, data){
+            if(err){
+            console.log(err);
+            callback(err,data);}else{
                 for(var key in mydata){
                     
                     var obj = mydata[key];
@@ -157,7 +160,9 @@ var mydata = data;
 var mypath = this.path;
     db.collection(this.name, function(err, con){
         
-            if(err){callback(err,data);}else{
+            if(err){
+            console.log(err)
+            callback(err,data);}else{
                 for(var key in mydata){
                     
                     var obj = mydata[key];
@@ -175,7 +180,10 @@ var mypath = this.path;
                        });
                     }
                 }
-                callback(err,data);
             }
+         con.insert(mydata,function(err,data){
+                    console.log(err)
+                    callback(err,data);
+         })
     });
 }
