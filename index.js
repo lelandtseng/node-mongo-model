@@ -82,13 +82,31 @@ Model.prototype.find = function find(conditions, config, callback){
 }
 
 Model.prototype.remove = function remove(id, callback){
+    var mypath = this.path;
     db.collection(this.name, function(err, con){
-        con.remove({
+        con.find({
             _id: id
-        }, function(err, type){
-            callback();
+        }, function(err, data){
+            
+            data.toArray(function(err, data){
+                con.remove({
+                    _id: id
+                }, function(err, type){
+                    callback();
+                });
+                for(var k in data[0]){
+                    var obj = data[0][k];
+                    if(obj && obj.name && obj.path){
+                       var myobj = obj;
+                       console.log(mypath+'/'+myobj.path);
+                       fs.unlink(mypath+'/'+myobj.path,function(err){console.log("22222"+err);});
+                    }
+                }
+            });
         });
+
     });
+    
 }
 
 Model.prototype.get = function get(id, callback){
