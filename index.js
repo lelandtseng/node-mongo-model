@@ -98,7 +98,7 @@ Model.prototype.remove = function remove(id, callback){
                     var obj = data[0][k];
                     if(obj && obj.name && obj.path){
                        var myobj = obj;
-                       console.log(mypath+'/'+myobj.path);
+                       console.log("------------->>>>"+mypath+'/'+myobj.path);
                        fs.unlink(mypath+'/'+myobj.path,function(err){console.log("22222"+err);});
                     }
                 }
@@ -125,20 +125,26 @@ Model.prototype.update = function update(id, data, callback){
 
 var mydata = data;
 var mypath = this.path;
+var oldobj = {};
 
     db.collection(this.name, function(err, con){
         con.find({
             _id: id
         }, function(err, data){
             data.toArray(function(err, data){
-
+        
+        for(var k in data[0]){          
+            oldobj[k] = data[0][k];
+        }
+        
         for(var k in mydata){
             if(mydata[k]){
-               data[0][k] = mydata[k];
+               var obj = mydata[k];
+               if(obj && obj.name && obj.path){}
+               else{data[0][k] = mydata[k];}
             }
         }
         
-        console.log(mydata)  
         con.update({
             _id: id
         }, data[0], function(err, data){
@@ -148,15 +154,19 @@ var mypath = this.path;
                 for(var key in mydata){
                     
                     var obj = mydata[key];
+                    
                     if(obj && obj.name && obj.path){
+
                        var myobj = obj;
                        fs.readFile("/tmp/"+obj.path, function (err, data) {
                        
                        if (err){
                        
-                       }else{                          
-                           fs.writeFile(mypath+'/'+myobj.path, data, function (err) {
-                              console.log(err);
+                       }else{    
+                           console.log("old:"+oldobj[key].path); 
+                           console.log("new:"+obj.path);         
+                           fs.writeFile(mypath+'/'+oldobj[key].path, data, function (err) {
+                              console.log("fdfsfsfsssfsfsfsfs>>>>>"+err);
                            });                              
                            }
                        });
