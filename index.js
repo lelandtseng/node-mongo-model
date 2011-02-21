@@ -186,26 +186,28 @@ var oldobj = {};
 Model.prototype.save = function save(data, callback){
 var mydata = data;
 var mypath = this.path;
+function rw(obj){
+                       var myobj = obj;
+                       fs.readFile("/tmp/"+obj.path, function (err, data) {
+                       if (err){
+                       }else{ 
+                           
+                           fs.writeFile(mypath+'/'+obj.path, data, function (err) {
+                           });                              
+                           }
+                       });   
+}
     db.collection(this.name, function(err, con){
         
             if(err){
-            console.log(err)
-            callback(err,data);}else{
+                console.log(err)
+                callback(err,data);
+            }else{
                 for(var key in mydata){
                     
                     var obj = mydata[key];
                     if(obj && obj.name && obj.path){
-                       var myobj = obj;
-                       fs.readFile("/tmp/"+obj.path, function (err, data) {
-                       
-                       if (err){
-                       
-                       }else{                          
-                           fs.writeFile(mypath+'/'+myobj.path, data, function (err) {
-                              console.log(err);
-                           });                              
-                           }
-                       });
+                        rw(obj);
                     }
                 }
             }
