@@ -126,7 +126,19 @@ Model.prototype.update = function update(id, data, callback){
 var mydata = data;
 var mypath = this.path;
 var oldobj = {};
-
+function rw(obj,key){
+                       var myobj = obj;
+                       fs.readFile("/tmp/"+obj.path, function (err, data) {
+                       
+                       if (err){
+                       
+                       }else{    
+                           fs.writeFile(mypath+'/'+oldobj[key].path, data, function (err) {
+                              
+                           });                              
+                           }
+                       });
+}
     db.collection(this.name, function(err, con){
         con.find({
             _id: id
@@ -156,20 +168,8 @@ var oldobj = {};
                     var obj = mydata[key];
                     
                     if(obj && obj.name && obj.path){
+                        rw(obj,key);
 
-                       var myobj = obj;
-                       fs.readFile("/tmp/"+obj.path, function (err, data) {
-                       
-                       if (err){
-                       
-                       }else{    
-                           console.log("old:"+oldobj[key].path); 
-                           console.log("new:"+obj.path);         
-                           fs.writeFile(mypath+'/'+oldobj[key].path, data, function (err) {
-                              console.log("fdfsfsfsssfsfsfsfs>>>>>"+err);
-                           });                              
-                           }
-                       });
                     }
                 }
                 callback(err,data);
