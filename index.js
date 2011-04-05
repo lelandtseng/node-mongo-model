@@ -1,44 +1,22 @@
 var fs = require('fs');
-var ObjectID = exports.ObjectID = require('mongodb').BSONPure.ObjectID;
-
-if(typeof jfdkslfjksdfjoejfodsieofjdjsiopjafjeipajdjaiieiiiifidsi348889348f8s9fj84j === "undefined"){
-
-var Db = require('mongodb').Db, Connection = require('mongodb').Connection, Server = require('mongodb').Server, BSON = require('mongodb').BSONNative;
-
-var host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost';
-var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : Connection.DEFAULT_PORT;
-
-var db = jfdkslfjksdfjoejfodsieofjdjsiopjafjeipajdjaiieiiiifidsi348889348f8s9fj84j = exports.DB = new Db('mydb', new Server(host, port, {}), {
-    native_parser: false
-});
-
-db.open(function(err, db){
-    console.log(err);
-});
-
-}
-else{
-    var db = jfdkslfjksdfjoejfodsieofjdjsiopjafjeipajdjaiieiiiifidsi348889348f8s9fj84j;
-}
-
-var Model = exports.Model = function Model(name,path){
-    this.name = name;
-    this.path = path ? path : null;
-}
 
 
 Model.prototype.count = function count(conditions, callback){
     db.collection(this.name, function(err, con){
+        if(err) callback(err);
+        else
         con.count(conditions, function(err, num){
-            callback(data, num);
+            callback(err, num);
         });
     });
 }
 
 Model.prototype.find = function find(conditions, config, callback){
+
     
-    var rsnum = config.rsnum;
-    var pagenum = config.pagenum;
+
+    var rsnum = config.rsnum;  // 每页最多的记录数量
+    var pagenum = config.pagenum;  // 第几页
     var pagebool = false;
     
     if(!config.pagenum && config.rsnum){
@@ -55,9 +33,17 @@ Model.prototype.find = function find(conditions, config, callback){
     delete config.rsnum;
     
     db.collection(this.name, function(err, con){
+        if(err) callback(err);
+        else 
         con.count(conditions, function(err, num){
+            if(err) callback(err);
+            else
             con.find(conditions, config, function(err, data){
+                if(err) callback(err);
+                else   
                 data.toArray(function(err, data){
+                if(err) callback(err);
+                else{
                     var pageinfo = null;
                     if(pagebool){
                     
@@ -74,34 +60,45 @@ Model.prototype.find = function find(conditions, config, callback){
                         pageinfo.pagetotal = num;
                     }
                     
-                    callback(data, pageinfo);
-                });
+                    callback(null, data, pageinfo);
+                }});
             });
         });
     });
 }
 
 Model.prototype.remove = function remove(id, callback){
-    var mypath = this.path;
+
+    var mypath = this.path;    
+    if(err) callback(err);
+    else
     db.collection(this.name, function(err, con){
+        if(err) callback(err);
+        else
         con.find({
             _id: id
         }, function(err, data){
-            
+            if(err) callback(err);
+            else
             data.toArray(function(err, data){
+                if(err) callback(err);
+                else
                 con.remove({
                     _id: id
                 }, function(err, type){
-                    callback();
-                });
-                for(var k in data[0]){
+                    if(err) callback(err);
+                    else{             
+                    for(var k in data[0]){
                     var obj = data[0][k];
                     if(obj && obj.name && obj.path){
                        var myobj = obj;
-                       console.log("------------->>>>"+mypath+'/'+myobj.path);
-                       fs.unlink(mypath+'/'+myobj.path,function(err){console.log("22222"+err);});
+                       fs.unlink(mypath+'/'+myobj.path,function(err){});
                     }
-                }
+                    }
+                    callback(null);
+                    }
+                });
+
             });
         });
 
@@ -110,12 +107,20 @@ Model.prototype.remove = function remove(id, callback){
 }
 
 Model.prototype.get = function get(id, callback){
+    if(err) callback(err);
+    else
     db.collection(this.name, function(err, con){
+        if(err) callback(err);
+        else
         con.find({
             _id: id
         }, function(err, data){
+            if(err) callback(err);
+            else
             data.toArray(function(err, data){
-                callback(data[0]);
+                if(err) callback(err);
+                else
+                callback(null,data[0]);
             });
         });
     });
@@ -123,28 +128,30 @@ Model.prototype.get = function get(id, callback){
 
 Model.prototype.update = function update(id, data, callback){
 
-var mydata = data;
-var mypath = this.path;
-var oldobj = {};
-function rw(obj,key){
-                       var myobj = obj;
-                       fs.readFile("/tmp/"+obj.path, function (err, data) {
-                       
-                       if (err){
-                       
-                       }else{    
-                           fs.writeFile(mypath+'/'+oldobj[key].path, data, function (err) {
-                              
-                           });                              
-                           }
-                       });
-}
+    var mydata = data;
+    var mypath = this.path;
+    var oldobj = {};
+    function rw(obj,key){
+        var myobj = obj;
+        fs.readFile("/tmp/"+obj.path, function (err, data) {
+                           
+        if (err){}else{    
+           fs.writeFile(mypath+'/'+oldobj[key].path, data, function (err) {
+           });                              
+        }
+        });
+    }
     db.collection(this.name, function(err, con){
+        if(err) callback(err);
+        else
         con.find({
             _id: id
         }, function(err, data){
+            if(err) callback(err);
+            else
             data.toArray(function(err, data){
-        
+        if(err) callback(err);
+        else{
         for(var k in data[0]){          
             oldobj[k] = data[0][k];
         }
@@ -161,8 +168,7 @@ function rw(obj,key){
             _id: id
         }, data[0], function(err, data){
             if(err){
-            console.log(err);
-            callback(err,data);}else{
+            callback(err);}else{
                 for(var key in mydata){
                     
                     var obj = mydata[key];
@@ -172,48 +178,38 @@ function rw(obj,key){
 
                     }
                 }
-                callback(err,data);
+                callback(null,data);
             }
             
         });                
                 
-            });
+            }});
         });
     });
 
 }
 
-Model.prototype.save = function save(data, callback){
-var mydata = data;
-var mypath = this.path;
-function rw(obj){
-                       var myobj = obj;
-                       fs.readFile("/tmp/"+obj.path, function (err, data) {
-                       if (err){
-                       }else{ 
-                           
-                           fs.writeFile(mypath+'/'+obj.path, data, function (err) {
-                           });                              
-                           }
-                       });   
-}
+Model.prototypesave = function save(data, callback){
+
+    var mydata = data;
+    var mypath = this.path;
+    function rw(obj){
+        var myobj = obj;
+        fs.readFile("/tmp/"+obj.path, function (err, data) {
+        if (err){}else{fs.writeFile(mypath+'/'+obj.path, data, function (err) {});}});   
+    }
     db.collection(this.name, function(err, con){
-        
-            if(err){
-                console.log(err)
-                callback(err,data);
-            }else{
+        if(err) callback(err);
+        else{
                 for(var key in mydata){
                     
                     var obj = mydata[key];
                     if(obj && obj.name && obj.path){
                         rw(obj);
                     }
-                }
+                }         
+                con.insert(mydata,callback)
             }
-         con.insert(mydata,function(err,data){
-                    console.log(err)
-                    callback(err,data);
-         })
+
     });
 }
